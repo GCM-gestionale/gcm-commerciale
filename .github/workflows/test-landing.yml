@@ -5,6 +5,7 @@ on:
     paths:
       - 'index.html'
       - 'scripts/check-release-page.cjs'
+      - 'scripts/audit-live-site.cjs'
       - '.github/workflows/test-landing.yml'
   workflow_dispatch:
 permissions:
@@ -19,3 +20,12 @@ jobs:
           node-version: '22'
       - name: Controlla informazioni versioni e link della pagina
         run: node scripts/check-release-page.cjs
+      - name: Verifica in sola lettura che il sito commerciale sia online
+        run: node scripts/audit-live-site.cjs
+      - name: Conserva esito controllo sito pubblico
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: GCM-commercial-site-readonly-check
+          path: gcm-commercial-live-check.json
+          retention-days: 7
