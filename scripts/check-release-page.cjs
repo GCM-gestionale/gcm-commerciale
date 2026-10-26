@@ -1,0 +1,16 @@
+'use strict';
+const fs=require('node:fs');
+const assert=require('node:assert/strict');
+const html=fs.readFileSync('index.html','utf8');
+assert.match(html,/<title>GCM Commerciale \| Gestionale Cinofilia Multifunzione<\/title>/);
+for(const label of ['BASE','PROFESSIONAL','BUSINESS'])assert.match(html,new RegExp('>'+label+'<'));
+for(const id of ['funzioni','licenze','download'])assert.match(html,new RegExp('<section\\s+id="'+id+'"'));
+const old='https://github.com/GCM-gestionale/gcm-commerciale/releases/download/v224.1.32/GCM_Setup_Windows_x64_224.1.32.exe';
+assert.ok(html.includes(old),'Missing link to existing previously published release');
+assert.ok(html.includes('SCARICA VERSIONE 224.1.32'),'Old version must be explicit');
+assert.ok(html.includes('224.1.33'),'New candidate must be identified');
+assert.ok(html.includes('In collaudo: download non ancora disponibile'),'New release must not be advertised as available');
+assert.ok(!html.includes('/releases/download/v224.1.33/'),'Do not publish unapproved candidate link');
+const ids=new Set([...html.matchAll(/\sid=["']([^"']+)["']/g)].map(m=>m[1]));
+for(const m of html.matchAll(/\shref=["']#([^"']+)["']/g))assert.ok(ids.has(m[1]),'Broken internal navigation: '+m[1]);
+console.log('GCM Commerciale: site links, existing release and unapproved candidate checked');
